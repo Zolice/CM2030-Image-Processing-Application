@@ -1,15 +1,18 @@
 class Display {
-    constructor(name, height, width, parent = "body", object) {
+    constructor(name, height, width, parent = "body", objects = []) {
         // setup variables
         this.name = name
         this.height = height
         this.width = width
         this.parent = parent
         this.body = null
+        this.objects = []
 
         this.createParent()
 
-        this.createObject(object)
+        objects.forEach(element => {
+            this.addObject(element)
+        });
     }
 
     createParent() {
@@ -24,9 +27,9 @@ class Display {
         h.elt.width = "100%"
     }
 
-    createObject(object) {
+    addObject(object) {
         // Add the object to the parent
-        this.object = object
-        this.object.parent(this.body)
+        object.parent(this.body)
+        this.objects.push(object)
     }
 }

@@ -1,18 +1,34 @@
 class Camera {
-    constructor() {
+    constructor(parent, callback = null) {
         this.loaded = false
+        console.log("aa")
 
         this.camera = createCapture(VIDEO, () => {
+            console.log("aab")
             this.loaded = true
             this.camera.size(cameraSize.x, cameraSize.y)
+            if(parent) {
+                this.camera.parent(parent)
+            }
+            else {
+                this.camera.hide()
+            }
+            if (callback) callback()
             // this.camera.hide()
         })
+
+        this.pixels = []
     }
 
-    getImage() {
+    loadPixels() {
         if (!this.loaded) return null
-        // this.camera.loadPixels()
-        // return this.camera.pixels
+        if(this.pixels.length <= 1) {
+            this.camera.loadPixels()
+            return this.camera.pixels
+        }
+        else {
+            return this.pixels
+        }
     }
 
     getCamera() {

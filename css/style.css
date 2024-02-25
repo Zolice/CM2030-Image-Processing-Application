@@ -7,7 +7,19 @@ body {
   align-items: center;
 
   row-gap: 32px;
-  column-gap: 32px;
+  /* column-gap: 32px; */
+}
+
+.display {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
+  align-items: center;
+
+  row-gap: 16px;
+  /* column-gap: 32px; */
 }
 
 .row {
@@ -33,16 +45,16 @@ body {
 }
 
 canvas {
-  vertical-align: top;
+  /* vertical-align: top; */
 }
 
 /* Set the defaultCanvas0 to center */
-#defaultCanvas0 {
+/* #defaultCanvas0 {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-}
+} */
 
 .main {
   height: 100%;
