@@ -4,7 +4,7 @@ const cameraSize = { x: 160, y: 120 }
 let canvas
 let cameraDisplay
 let video
-let rgbSlider = []
+let sliders = []
 
 /**
  * Setup all cameras
@@ -77,22 +77,29 @@ function setup() {
     setupCamera()
 
     // Create the canvas
-    canvas = createCanvas(cameraSize.x * 3, cameraSize.y * 5)
+    canvas = createCanvas(cameraSize.x * 3, getY(5))
     canvas.parent("display")
 
     background(250)
     frameRate(30)
 
-    // create 3 sliders
-    rgbSlider.push(new Display("Red", 0, 255, "row2", [createSlider(0, 255, 100)]))
-    rgbSlider.push(new Display("Green", 0, 255, "row2", [createSlider(0, 255, 100)]))
-    rgbSlider.push(new Display("Blue", 0, 255, "row2", [createSlider(0, 255, 100)]))
+    // create 3 rgb sliders
+    sliders.push(new Display("Red", 0, 255, "row2", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("Green", 0, 255, "row2", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("Blue", 0, 255, "row2", [createSlider(0, 255, 100)]))
 
+    // create 2 colourspace conversion sliders
+    sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("HSL", 0, 255, "row3", [createSlider(0, 255, 100)]))
 }
 
 function draw() {
     // draw a grey background
     background(250)
+
+    // text settings
+    textSize(24)
+    fill(0)
 
     // Check if camera loaded
     if (!video.loaded && video.pixels.length <= 0) return
@@ -102,25 +109,49 @@ function draw() {
     image(video.getImgFromPixels(), getX(0), getY(0), 160, 120)
     image(video.getImgFromPixels(), getX(0), getY(3), 160, 120)
 
+    // add labels
+    text("Original", getX(0), getY(1) - 12)
+    text("Original", getX(0), getY(4) - 12)
 
-    loadPixels()
-    // console.log("aa")
+    // loadPixels()
     // draw the grayscale img
     image(video.getGrayscale(), getX(1), getY(0), 160, 120)
-
-    // image(video.getImgFromPixels(), getX(2), getY(0), 160, 120)
 
     // draw rgb channel
     image(video.getRGB(), getX(0), getY(1), 480, 120)
 
     // draw the threshold img
-    image(video.getThreshold(rgbSlider[0].objects[0].value(), rgbSlider[1].objects[0].value(), rgbSlider[2].objects[0].value()), getX(0), getY(2), 480, 120)
+    image(video.getThreshold(sliders[0].objects[0].value(), sliders[1].objects[0].value(), sliders[2].objects[0].value()), getX(0), getY(2), 480, 120)
+
+    // add labels
+    text("Grayscale", getX(1), getY(1) - 12)
+    
+    text("Red", getX(0), getY(2) - 12)
+    text("Green", getX(1), getY(2) - 12)
+    text("Blue", getX(2), getY(2) - 12)
+
+    text("Threshold", getX(0), getY(3) - 12)
+    text("Threshold", getX(1), getY(3) - 12)
+    text("Threshold", getX(2), getY(3) - 12)
 
     // draw the CMYK
     image(video.getConvertedCMYK(), getX(1), getY(3), 160, 120)
 
     // draw the HSL
     image(video.getConvertedHSL(), getX(2), getY(3), 160, 120)
+
+    // draw threshold cmyk
+    image(video.getThresholdCMYK(sliders[3].objects[0].value()), getX(1), getY(4), 160, 120)
+
+    // draw threshold hsl
+    image(video.getThresholdHSL(sliders[4].objects[0].value()), getX(2), getY(4), 160, 120)
+
+    // add labels
+    text("CMYK", getX(1), getY(4) - 12)
+    text("HSL", getX(2), getY(4) - 12)
+
+    text("Threshold", getX(1), getY(5) - 12)
+    text("Threshold", getX(2), getY(5) - 12)
 }
 
 function getX(i) {
@@ -129,5 +160,5 @@ function getX(i) {
 }
 
 function getY(i) {
-    return i * cameraSize.y
+    return i * cameraSize.y + i * 36
 }

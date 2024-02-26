@@ -19,7 +19,7 @@ class Camera {
 
         this.pixels = []
         this.rgb = null
-        this.convertCMKY = null
+        this.convertCMYK = null
         this.convertHSL = null
     }
 
@@ -49,9 +49,9 @@ class Camera {
         return this.camera
     }
 
-    getGrayscale() {
+    getGrayscale(original = this.getImgFromPixels()) {
         if (!this.loaded && this.pixels.length <= 0) return null
-        let original = this.getImgFromPixels()
+        // let original = this.getImgFromPixels()
 
         // console.log(this.camera.pixels.length)
         let grayscale = createImage(cameraSize.x, cameraSize.y)
@@ -79,10 +79,10 @@ class Camera {
         return grayscale
     }
 
-    getRGB() {
+    getRGB(original = this.getImgFromPixels()) {
         if (!this.loaded && this.pixels.length <= 0) return null
         // let original = this.loadPixels()
-        let original = this.getImgFromPixels()
+        // let original = this.getImgFromPixels()
         let img = createImage(original.width * 3, original.height)
         // console.log(img)
         // load the image 
@@ -147,7 +147,7 @@ class Camera {
     getThreshold(red, green, blue) {
         if (!this.loaded && this.pixels.length <= 0) return null
 
-        if(!this.rgb) return null
+        if (!this.rgb) return null
 
         // directly apply threshold
         this.rgb.loadPixels()
@@ -165,8 +165,8 @@ class Camera {
 
                 if (x < cameraSize.x) {
                     img.pixels[index] = r > red ? 255 : 0
-                    img.pixels[index+1] = r > red ? 255 : 0
-                    img.pixels[index+2] = r > red ? 255 : 0
+                    img.pixels[index + 1] = r > red ? 255 : 0
+                    img.pixels[index + 2] = r > red ? 255 : 0
                 }
                 if (x >= cameraSize.x && x <= cameraSize.x * 2) {
                     img.pixels[index] = g > green ? 255 : 0
@@ -185,14 +185,14 @@ class Camera {
         return img
     }
 
-    getConvertedCMYK(){
+    getConvertedCMYK(original = this.getImgFromPixels()) {
         if (!this.loaded && this.pixels.length <= 0) return null
         // get the original
-        let original = this.getImgFromPixels()
+        // let original = this.getImgFromPixels()
 
         // directly edit the original
         original.loadPixels()
-        
+
         for (let x = 0; x < original.width; x++) {
             for (let y = 0; y < original.height; y++) {
                 let index = (x + y * original.width) * 4
@@ -216,18 +216,18 @@ class Camera {
         original.updatePixels()
 
         // save the img as this.convertCMYK
-        this.convertCMKY = original
+        this.convertCMYK = original
         return original
     }
 
-    getConvertedHSL() {
+    getConvertedHSL(original = this.getImgFromPixels()) {
         if (!this.loaded && this.pixels.length <= 0) return null
         // get the original
-        let original = this.getImgFromPixels()
+        // let original = this.getImgFromPixels()
 
         // directly edit the original
         original.loadPixels()
-        
+
         for (let x = 0; x < original.width; x++) {
             for (let y = 0; y < original.height; y++) {
                 let index = (x + y * original.width) * 4
@@ -281,5 +281,56 @@ class Camera {
         return original
     }
 
-    
+    getThresholdCMYK(threshold, original = this.convertCMYK) {
+        if (!this.loaded && this.pixels.length <= 0) return null
+        if (!original) return null
+
+        // apply threshold
+        original.loadPixels()
+        for (let x = 0; x < original.width; x++) {
+            for (let y = 0; y < original.height; y++) {
+                let index = (x + y * original.width) * 4
+                let c = original.pixels[index]
+                let m = original.pixels[index + 1]
+                let yellow = original.pixels[index + 2]
+                let a = original.pixels[index + 3]
+
+                let avg = (c + m + yellow) / 3
+                original.pixels[index] = avg > threshold ? 255 : 0
+                original.pixels[index + 1] = avg > threshold ? 255 : 0
+                original.pixels[index + 2] = avg > threshold ? 255 : 0
+                original.pixels[index + 3] = a
+            }
+        }
+
+        original.updatePixels()
+        return original
+    }
+
+    getThresholdHSL(threshold, original = this.convertHSL) {
+        if(!this.loaded && this.pixels.length <= 0) return null
+        if(!original) return null
+
+        // apply threshold
+        original.loadPixels()
+        for (let x = 0; x < original.width; x++) {
+            for (let y = 0; y < original.height; y++) {
+                let index = (x + y * original.width) * 4
+                let h = original.pixels[index]
+                let s = original.pixels[index + 1]
+                let l = original.pixels[index + 2]
+                let a = original.pixels[index + 3]
+
+                let avg = (h + s + l) / 3
+
+                original.pixels[index] =  threshold > avg ? 255 : 0
+                original.pixels[index + 1] = threshold > avg? 255 : 0
+                original.pixels[index + 2] = threshold > avg? 255 : 0
+                original.pixels[index + 3] = a
+            }
+        }
+
+        original.updatePixels()
+        return original
+    }
 }
