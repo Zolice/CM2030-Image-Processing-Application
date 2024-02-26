@@ -5,6 +5,8 @@ class Camera {
 
         this.camera = createCapture(VIDEO, () => {
             console.log("aab")
+            this.originalHeight = this.camera.height
+            this.originalWidth = this.camera.width
             this.loaded = true
             this.camera.size(cameraSize.x, cameraSize.y)
             if (parent) {
@@ -50,12 +52,17 @@ class Camera {
     }
 
     getGrayscale(original = this.getImgFromPixels()) {
-        if (!this.loaded && this.pixels.length <= 0) return null
+        // if (!this.loaded && this.pixels.length <= 0) return null
+        if(!original) return
+
+        console.log(original.width, original.height)
         // let original = this.getImgFromPixels()
 
         // console.log(this.camera.pixels.length)
         let grayscale = createImage(original.width, original.height)
         grayscale.loadPixels()
+
+        console.log(grayscale.width, grayscale.height)
 
         for (let i = 0; i < grayscale.width * grayscale.height; i++) {
             let index = i * 4
@@ -71,6 +78,7 @@ class Camera {
             grayscale.pixels[index + 2] = min(gray * 1.2, 255)
             grayscale.pixels[index + 3] = a
         }
+        console.log("aa")
 
         // img.updatePixels()
         // image(img, getX(1), getY(1))

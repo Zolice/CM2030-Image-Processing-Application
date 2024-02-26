@@ -6,6 +6,7 @@ var canvas
 var cameraDisplay
 var video
 var sliders
+var dropdowns
 
 var detector
 
@@ -15,8 +16,8 @@ var currentFaceEffect
 const faceEffect = {
     GRAYSCALE: 'grayscale',
     BLUR: 'blur',
-    CONVERT_HSL: 'convertHSL',
     CONVERT_CMYK: 'convertCMYK',
+    CONVERT_HSL: 'convertHSL',
     PIXELATE: 'pixelate'
 }
 
@@ -31,7 +32,7 @@ function setupCamera() {
     video = new Camera(cameraDisplay.body, () => {
         // Add the camera to the display objects manually
         cameraDisplay.objects.push(video.camera)
-
+        detector = new objectdetect.detector(video.originalWidth, video.originalHeight, 1.2, classifier);
     })
 
 
@@ -109,7 +110,15 @@ function setup() {
     sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
     sliders.push(new Display("HSL", 0, 255, "row3", [createSlider(0, 255, 100)]))
 
-    detector = new objectdetect.detector(width, height, 1.2, classifier);
+    // create the dropdown for the face effects
+    let dropdown = createSelect()
+    dropdown.option("Grayscale", faceEffect.GRAYSCALE)
+    dropdown.option("Blur", faceEffect.BLUR)
+    dropdown.option("Convert to CMYK", faceEffect.CONVERT_CMYK)
+    dropdown.option("Convert to HSL", faceEffect.CONVERT_HSL)
+    dropdown.option("Pixelate", faceEffect.PIXELATE)
+
+    dropdowns = new Display("Face Effects", 0, 255, "row4", [dropdown])
 }
 
 function draw() {
@@ -177,36 +186,107 @@ function draw() {
         let faces = detector.detect(video.camera.elt)
         let faceImg = video.getImgFromPixels()
 
-        // edit the faces 
-        faces.forEach((face) => {
-            if (face[4] > 4) {
-                let edited = createImage(face[2], face[3])
-                edited.copy(faceImg, face[0], face[1], face[2], face[3], 0, 0, face[2], face[3])
+        // image(faceImg, getX(2), getY(5))
 
-                switch (currentFaceEffect) {
+        faceImg.loadPixels()
+        console.log("faceimg", faceImg.pixels[3])
+
+        // console.log(video.camera.elt.height)
+
+        // edit the faces 
+        console.log("faces.length", faces.length)
+        faces.forEach((face) => {
+            console.log(face[4])
+            if (face[4] > 4) {
+                // scale the values of the detector down to camera size
+                console.log("before", face[0], face[1], face[2], face[3])
+                face[0] = Math.floor(map(face[0], 0, video.originalWidth, 0, faceImg.width))
+                face[1] = Math.floor(map(face[1], 0, video.originalHeight, 0, faceImg.height))
+                face[2] = Math.floor(map(face[2], 0, video.originalWidth, 0, faceImg.width))
+                face[3] = Math.floor(map(face[3], 0, video.originalHeight, 0, faceImg.height))
+
+                console.log("after", face[0], face[1], face[2], face[3])
+
+
+                let edited = createImage(face[2], face[3])
+                console.log(edited.width, edited.height)
+                edited.loadPixels()
+                // edited.copy(faceImg, face[0], face[1], face[2], face[3], 0, 0, face[2], face[3])
+
+                // let i = 0
+                // let j = 0
+
+                // let counter = 0
+                // for (let x = face[0]; x <= face[0] + face[2]; x++) {
+                //     for (let y = face[1]; y <= face[1] + face[3]; y++) {
+                //         let index = (y * faceImg.width + x) * 4
+                //         let editIndex = (j * edited.width + i) * 4
+                //         j++
+                //         // edited.pixels[editIndex] = faceImg.pixels[index]
+                //         edited.pixels[editIndex] = 255
+                //         edited.pixels[editIndex + 1] = faceImg.pixels[index + 1]
+                //         edited.pixels[editIndex + 2] = faceImg.pixels[index + 2]
+                //         edited.pixels[editIndex + 3] = faceImg.pixels[index + 3]
+                //         counter++
+                //     }
+                //     i++
+                // }
+
+                let i = 0;
+                for (let x = face[0]; x <= face[0] + face[2]; x++) {
+                    let j = 0;
+                    for (let y = face[1]; y <= face[1] + face[3]; y++) {
+                        let index = (y * faceImg.width + x) * 4;
+                        let editIndex = (j * edited.width + i) * 4;
+                        edited.pixels[editIndex] = faceImg.pixels[index]
+                        edited.pixels[editIndex + 1] = faceImg.pixels[index + 1];
+                        edited.pixels[editIndex + 2] = faceImg.pixels[index + 2];
+                        edited.pixels[editIndex + 3] = faceImg.pixels[index + 3];
+                        j++;
+                    }
+                    i++;
+                }
+                // console.log("counter", counter)
+
+                edited.updatePixels()
+
+                // image(edited, getX(1), getY(5))
+
+                // console.log(edited)
+
+                switch (dropdowns.objects[0].value()) {
                     case faceEffect.GRAYSCALE:
                         edited = video.getGrayscale(edited)
                         console.log("edited")
                         break
                     case faceEffect.BLUR:
-
+                        edited = blurImage(edited)
                         break
                     case faceEffect.CONVERT_HSL:
+                        edited = video.getConvertedHSL(edited)
                         break
                     case faceEffect.CONVERT_CMYK:
+                        edited = video.getConvertedCMYK(edited)
                         break
                     case faceEffect.PIXELATE:
                         break
                 }
 
+                // edited.updatePixels()
+
+                // console.log("check alpha", edited.pixels[3])
+
+                image(edited, getX(0), getY(5))
+
                 faceImg.copy(edited, 0, 0, face[2], face[3], face[0], face[1], face[2], face[3])
+                // faceImg.updatePixels()
                 console.log("copied over")
             }
         })
 
         // draw the face detection
         image(faceImg, getX(0), getY(4), 160, 120)
-        console.log(faceImg)
+        // console.log(faceImg)
     }
 
     // performance checker
@@ -220,4 +300,67 @@ function getX(i) {
 
 function getY(i) {
     return i * cameraSize.y + i * 36
+}
+
+function blurImage(image) {
+    if (!image) return null
+
+    let m = [];
+    let size = 2
+    for (let i = 0; i < size; i++) {
+        let n = [];
+        for (let j = 0; j < size; j++) {
+            n.push(1 / (size * size));
+        }
+        m.push(n);
+    }
+
+    image.loadPixels();
+
+    for (var x = 0; x < image.width; x++) {
+        for (var y = 0; y < image.height; y++) {
+            var pixelIndex = ((image.width * y) + x) * 4;
+            var r = image.pixels[pixelIndex + 0];
+            //calculate the convolution value for that pixel
+            var c = convolution(x, y, m, image);
+            //update each pixel with new RGB value
+            image.pixels[pixelIndex + 0] = c[0];
+            image.pixels[pixelIndex + 1] = c[1];
+            image.pixels[pixelIndex + 2] = c[2];
+        }
+    }
+
+    image.updatePixels();
+    return image
+}
+
+function convolution(x, y, matrix, img) {
+    var matrixSize = matrix.length;
+    var totalRed = 0.0;
+    var totalGreen = 0.0;
+    var totalBlue = 0.0;
+    var offset = floor(matrixSize / 2);
+
+    // convolution matrix loop
+    for (var i = 0; i < matrixSize; i++) {
+        for (var j = 0; j < matrixSize; j++) {
+            // Get pixel loc within convolution matrix
+            var xloc = x + i - offset;
+            var yloc = y + j - offset;
+
+            // ensure we don't address a pixel that doesn't exist
+            if (xloc < 0 || xloc >= img.width || yloc < 0 || yloc >= img.height) {
+                continue;
+            }
+
+            var index = (xloc + img.width * yloc) * 4;
+
+            // multiply all values with the mask and sum up
+            totalRed += img.pixels[index + 0] * matrix[i][j];
+            totalGreen += img.pixels[index + 1] * matrix[i][j];
+            totalBlue += img.pixels[index + 2] * matrix[i][j];
+        }
+    }
+    // return the new color as an array
+    return [totalRed, totalGreen, totalBlue];
 }
