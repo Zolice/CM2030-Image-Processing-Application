@@ -17,7 +17,10 @@ function setupCamera() {
     video = new Camera(cameraDisplay.body, () => {
         // Add the camera to the display objects manually
         cameraDisplay.objects.push(video.camera)
+        
+    })
 
+    
         // Add the other objects
         let button = createButton("Take Picture")
         button.mousePressed(() => {
@@ -42,8 +45,11 @@ function setupCamera() {
 
                     // load img and extract pixels
                     loadImage(file.data, (image) => {
-                        console.log("call")
+                        image.resize(cameraSize.x, cameraSize.y)
+                        image.loadPixels()
                         video.pixels = image.pixels
+                        console.log("call")
+                        console.log(video.pixels.length)
                     })
 
                     // image(file, 0, 0, 160, 120)
@@ -64,7 +70,6 @@ function setupCamera() {
         })
 
         cameraDisplay.addObject(button)
-    })
 }
 
 function setup() {
@@ -75,7 +80,8 @@ function setup() {
     canvas = createCanvas(cameraSize.x * 3, cameraSize.y * 5)
     canvas.parent("display")
 
-    background(125)
+    background(250)
+    frameRate(30)
 
     // create 3 sliders
     rgbSlider.push(new Display("Red", 0, 255, "row2", [createSlider(0, 255, 100)]))
@@ -86,15 +92,15 @@ function setup() {
 
 function draw() {
     // draw a grey background
-    background(125)
+    background(250)
 
     // Check if camera loaded
-    if (!video.loaded) return
+    if (!video.loaded && video.pixels.length <= 0) return
 
     // Draw the cameras
     // draw the 2 webcam images
-    image(video.getCamera(), getX(0), getY(0), 160, 120)
-    image(video.getCamera(), getX(0), getY(3), 160, 120)
+    image(video.getImgFromPixels(), getX(0), getY(0), 160, 120)
+    image(video.getImgFromPixels(), getX(0), getY(3), 160, 120)
 
 
     loadPixels()
@@ -102,11 +108,19 @@ function draw() {
     // draw the grayscale img
     image(video.getGrayscale(), getX(1), getY(0), 160, 120)
 
+    // image(video.getImgFromPixels(), getX(2), getY(0), 160, 120)
+
     // draw rgb channel
     image(video.getRGB(), getX(0), getY(1), 480, 120)
 
     // draw the threshold img
-    image(video.getThreshold(rgbSlider[0].objects[0].value, rgbSlider[1].objects[0].value, rgbSlider[2].objects[0].value,), getX(0), getY(2), 480, 120)
+    image(video.getThreshold(rgbSlider[0].objects[0].value(), rgbSlider[1].objects[0].value(), rgbSlider[2].objects[0].value()), getX(0), getY(2), 480, 120)
+
+    // draw the CMYK
+    image(video.getConvertedCMYK(), getX(1), getY(3), 160, 120)
+
+    // draw the HSL
+    image(video.getConvertedHSL(), getX(2), getY(3), 160, 120)
 }
 
 function getX(i) {
