@@ -1,10 +1,24 @@
 // Declare constant variables
 const cameraSize = { x: 160, y: 120 }
+const classifier = objectdetect.frontalface
 
-let canvas
-let cameraDisplay
-let video
-let sliders = []
+var canvas
+var cameraDisplay
+var video
+var sliders
+
+var detector
+
+var currentFaceEffect
+
+// Enumerators
+const faceEffect = {
+    GRAYSCALE: 'grayscale',
+    BLUR: 'blur',
+    CONVERT_HSL: 'convertHSL',
+    CONVERT_CMYK: 'convertCMYK',
+    PIXELATE: 'pixelate'
+}
 
 /**
  * Setup all cameras
@@ -17,71 +31,74 @@ function setupCamera() {
     video = new Camera(cameraDisplay.body, () => {
         // Add the camera to the display objects manually
         cameraDisplay.objects.push(video.camera)
-        
+
     })
 
-    
-        // Add the other objects
-        let button = createButton("Take Picture")
-        button.mousePressed(() => {
-            // save the picture
-            video.camera.loadPixels()
-            let img = createImage(cameraSize.x, cameraSize.y)
-            img.copy(video.camera, 0, 0, cameraSize.x, cameraSize.y, 0, 0, cameraSize.x, cameraSize.y)
-            img.save("image", "png")
 
-            // load the pixels into video.pixels[]
-            video.pixels = video.camera.pixels
+    // Add the other objects
+    let button = createButton("Take Picture")
+    button.mousePressed(() => {
+        // save the picture
+        video.camera.loadPixels()
+        let img = createImage(cameraSize.x, cameraSize.y)
+        img.copy(video.camera, 0, 0, cameraSize.x, cameraSize.y, 0, 0, cameraSize.x, cameraSize.y)
+        img.save("image", "png")
+
+        // load the pixels into video.pixels[]
+        video.pixels = video.camera.pixels
+    })
+    cameraDisplay.addObject(button)
+
+    // another button to upload picture
+    button = createButton("Select Picture")
+    button.mousePressed(() => {
+        // upload the picture
+        let input = createFileInput((file) => {
+            if (file.type === "image") {
+                console.log(file)
+
+                // load img and extract pixels
+                loadImage(file.data, (image) => {
+                    image.resize(cameraSize.x, cameraSize.y)
+                    image.loadPixels()
+                    video.pixels = image.pixels
+                    console.log("call")
+                    console.log(video.pixels.length)
+                })
+
+                // image(file, 0, 0, 160, 120)
+
+                // // load the pixels into video.pixels[]
+                // canvas.loadPixels()
+
+                // // create an image object 
+                // let img = createImage(160, 120)
+                // img.copy(canvas, 0, 0, 160, 120, 0, 0, 160, 120)
+
+                // // extract into video.pixels
+                // img.loadPixels()
+                // video.pixels = img.pixels                   
+            }
         })
-        cameraDisplay.addObject(button)
+        input.elt.click()
+    })
 
-        // another button to upload picture
-        button = createButton("Select Picture")
-        button.mousePressed(() => {
-            // upload the picture
-            let input = createFileInput((file) => {
-                if (file.type === "image") {
-                    console.log(file)
-
-                    // load img and extract pixels
-                    loadImage(file.data, (image) => {
-                        image.resize(cameraSize.x, cameraSize.y)
-                        image.loadPixels()
-                        video.pixels = image.pixels
-                        console.log("call")
-                        console.log(video.pixels.length)
-                    })
-
-                    // image(file, 0, 0, 160, 120)
-
-                    // // load the pixels into video.pixels[]
-                    // canvas.loadPixels()
-
-                    // // create an image object 
-                    // let img = createImage(160, 120)
-                    // img.copy(canvas, 0, 0, 160, 120, 0, 0, 160, 120)
-
-                    // // extract into video.pixels
-                    // img.loadPixels()
-                    // video.pixels = img.pixels                   
-                }
-            })
-            input.elt.click()
-        })
-
-        cameraDisplay.addObject(button)
+    cameraDisplay.addObject(button)
 }
 
 function setup() {
+    sliders = []
+    currentFaceEffect = faceEffect.GRAYSCALE
+
     // setup cameras
     setupCamera()
 
     // Create the canvas
-    canvas = createCanvas(cameraSize.x * 3, getY(5))
+    canvas = createCanvas(cameraSize.x * 3, getY(6))
     canvas.parent("display")
 
     background(250)
-    frameRate(30)
+    frameRate(3)
 
     // create 3 rgb sliders
     sliders.push(new Display("Red", 0, 255, "row2", [createSlider(0, 255, 100)]))
@@ -91,6 +108,8 @@ function setup() {
     // create 2 colourspace conversion sliders
     sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
     sliders.push(new Display("HSL", 0, 255, "row3", [createSlider(0, 255, 100)]))
+
+    detector = new objectdetect.detector(width, height, 1.2, classifier);
 }
 
 function draw() {
@@ -125,7 +144,7 @@ function draw() {
 
     // add labels
     text("Grayscale", getX(1), getY(1) - 12)
-    
+
     text("Red", getX(0), getY(2) - 12)
     text("Green", getX(1), getY(2) - 12)
     text("Blue", getX(2), getY(2) - 12)
@@ -152,6 +171,46 @@ function draw() {
 
     text("Threshold", getX(1), getY(5) - 12)
     text("Threshold", getX(2), getY(5) - 12)
+
+    // face detection
+    if (video.loaded) {
+        let faces = detector.detect(video.camera.elt)
+        let faceImg = video.getImgFromPixels()
+
+        // edit the faces 
+        faces.forEach((face) => {
+            if (face[4] > 4) {
+                let edited = createImage(face[2], face[3])
+                edited.copy(faceImg, face[0], face[1], face[2], face[3], 0, 0, face[2], face[3])
+
+                switch (currentFaceEffect) {
+                    case faceEffect.GRAYSCALE:
+                        edited = video.getGrayscale(edited)
+                        console.log("edited")
+                        break
+                    case faceEffect.BLUR:
+
+                        break
+                    case faceEffect.CONVERT_HSL:
+                        break
+                    case faceEffect.CONVERT_CMYK:
+                        break
+                    case faceEffect.PIXELATE:
+                        break
+                }
+
+                faceImg.copy(edited, 0, 0, face[2], face[3], face[0], face[1], face[2], face[3])
+                console.log("copied over")
+            }
+        })
+
+        // draw the face detection
+        image(faceImg, getX(0), getY(4), 160, 120)
+        console.log(faceImg)
+    }
+
+    // performance checker
+    console.log("Frame Rate", frameRate())
 }
 
 function getX(i) {

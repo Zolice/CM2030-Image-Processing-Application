@@ -54,10 +54,10 @@ class Camera {
         // let original = this.getImgFromPixels()
 
         // console.log(this.camera.pixels.length)
-        let grayscale = createImage(cameraSize.x, cameraSize.y)
+        let grayscale = createImage(original.width, original.height)
         grayscale.loadPixels()
 
-        for (let i = 0; i < cameraSize.x * cameraSize.y; i++) {
+        for (let i = 0; i < grayscale.width * grayscale.height; i++) {
             let index = i * 4
             let r = original.pixels[index]
             let g = original.pixels[index + 1]
