@@ -19,7 +19,8 @@ const faceEffect = {
     BLUR: 'blur',
     CONVERT_CMYK: 'convertCMYK',
     CONVERT_HSL: 'convertHSL',
-    PIXELATE: 'pixelate'
+    PIXELATE: 'pixelate',
+    FOCUS_FACE: 'focusFace'
 }
 
 /**
@@ -120,7 +121,7 @@ function setup() {
     // sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
 
     // create a checkbox to turn on/off the face detection and filters
-    checkboxes.push(new Display("Face Effects", 0, 255, "row4", [createCheckbox("Face Effects", true)]))
+    checkboxes.push(new Display("Filters", 0, 255, "row4", [createCheckbox("Filters", true)]))
     checkboxes.push(new Display("Face Detection", 0, 255, "row4", [createCheckbox("Face Detection", true)]))
 
     // create the dropdown for the face effects
@@ -130,6 +131,7 @@ function setup() {
     dropdown.option("3-Convert to CMYK", faceEffect.CONVERT_CMYK)
     dropdown.option("4-Convert to HSL", faceEffect.CONVERT_HSL)
     dropdown.option("5-Pixelate", faceEffect.PIXELATE)
+    dropdown.option("6-Focus Face", faceEffect.FOCUS_FACE)
 
     dropdowns.push(new Display("Face Effects", 0, 255, "row4", [dropdown]))
 }
@@ -199,7 +201,8 @@ function draw() {
     // face detection
     if (checkboxes[1].objects[0].checked() && video.loaded) {
         let faces = detector.detect(video.camera.elt)
-        let faceImg = video.getImgFromPixels()
+        video.camera.loadPixels()
+        let faceImg = video.getImgFromPixels(video.camera.pixels)
 
         // image(faceImg, getX(2), getY(5))
 
@@ -270,7 +273,7 @@ function draw() {
                 // console.log(edited)
 
                 // switch (dropdowns[0].value()) {
-                console.log(dropdowns[0])
+                // console.log(dropdowns[0])
                 switch (dropdowns[0].objects[0].value()) {
                     case faceEffect.GRAYSCALE:
                         edited = video.getGrayscale(edited)
@@ -286,6 +289,10 @@ function draw() {
                         edited = video.getConvertedCMYK(edited)
                         break
                     case faceEffect.PIXELATE:
+                        edited = pixelate(edited)
+                        break
+                    case faceEffect.FOCUS_FACE:
+                        edited = focusImg(faceImg, face[0], face[1], face[2] * 2)
                         break
                 }
 
@@ -293,9 +300,11 @@ function draw() {
 
                 // console.log("check alpha", edited.pixels[3])
 
-                image(edited, getX(0), getY(5))
+                if (dropdowns[0].objects[0].value() != faceEffect.FOCUS_FACE) {
+                    // image(edited, getX(0), getY(5))
 
-                faceImg.copy(edited, 0, 0, face[2], face[3], face[0], face[1], face[2], face[3])
+                    faceImg.copy(edited, 0, 0, face[2], face[3], face[0], face[1], face[2], face[3])
+                }
                 // faceImg.updatePixels()
                 // console.log("copied over")
             }
@@ -311,26 +320,39 @@ function draw() {
 }
 
 function keyPressed(event) {
-    if (event.key == 1){
+    if (event.key == 1) {
         // set fitler to 1
         dropdowns[0].objects[0].elt.value = faceEffect.GRAYSCALE
     }
-    else if (event.key == 2){
+    else if (event.key == 2) {
         // set fitler to 2
         dropdowns[0].objects[0].elt.value = faceEffect.BLUR
     }
-    else if (event.key == 3){
+    else if (event.key == 3) {
         // set fitler to 3
         dropdowns[0].objects[0].elt.value = faceEffect.CONVERT_CMYK
     }
-    else if (event.key == 4){
+    else if (event.key == 4) {
         // set fitler to 4
         dropdowns[0].objects[0].elt.value = faceEffect.CONVERT_HSL
     }
-    else if (event.key == 5){
+    else if (event.key == 5) {
         // set fitler to 5
         dropdowns[0].objects[0].elt.value = faceEffect.PIXELATE
     }
+    else if (event.key == 6) {
+        // set fitler to 6
+        dropdowns[0].objects[0].elt.value = faceEffect.FOCUS_FACE
+    }
+    // else if(event.key == 9){
+    //     // toggle face effect
+    //     checkboxes[0].objects[0].elt.checked = !checkboxes[0].objects[0].checked()
+    // }
+    // else if(event.key == 0) {
+    //     console.log("toggle?")
+    //     // toggle face detection
+    //     checkboxes[1].objects[0].elt.checked = !checkboxes[1].objects[0].checked()
+    // }
 }
 
 function getX(i) {
@@ -403,4 +425,70 @@ function convolution(x, y, matrix, img) {
     }
     // return the new color as an array
     return [totalRed, totalGreen, totalBlue];
+}
+
+function pixelate(img, pixelatedSize = 20) {
+    img.loadPixels();
+
+    //process block by block
+    for (var y = 0; y < img.height; y += pixelatedSize) {
+        for (var x = 0; x < img.width; x += pixelatedSize) {
+
+            var sumRed = 0;
+            var sumGreen = 0;
+            var sumBlue = 0;
+
+            //get the sum of RGB of that block
+            for (var i = 0; i < pixelatedSize; i++) {
+                for (var j = 0; j < pixelatedSize; j++) {
+                    var pixelIndex = ((img.width * (y + j)) + (x + i)) * 4;
+                    var pixelRed = img.pixels[pixelIndex + 0];
+                    var pixelGreen = img.pixels[pixelIndex + 1];
+                    var pixelBlue = img.pixels[pixelIndex + 2];
+                    sumRed += pixelRed;
+                    sumGreen += pixelGreen;
+                    sumBlue += pixelBlue;
+                }
+            }
+            //calcualte the ave of RGB of that block
+            var aveRed = sumRed / (pixelatedSize * pixelatedSize);
+            var aveGreen = sumGreen / (pixelatedSize * pixelatedSize);
+            var aveBlue = sumBlue / (pixelatedSize * pixelatedSize);
+
+            //paint the block with the ave RGB value
+            for (var i = 0; i < pixelatedSize; i++) {
+                for (var j = 0; j < pixelatedSize; j++) {
+                    var pixelIndex = ((img.width * (y + j)) + (x + i)) * 4;
+                    img.pixels[pixelIndex + 0] = aveRed;
+                    img.pixels[pixelIndex + 1] = aveGreen;
+                    img.pixels[pixelIndex + 2] = aveBlue;
+                }
+            }
+        }
+    }
+    img.updatePixels();
+
+    return img
+}
+
+function focusImg(img, x, y, radiusMax) {
+    img.loadPixels();
+    for (var i = 0; i < img.width; i++) {
+        for (var j = 0; j < img.height; j++) {
+            var d = dist(x, y, i, j);
+            var index = (i + j * img.width) * 4;
+            d > radiusMax ? d = 1 : d = map(d, 0, radiusMax, 1.5, 1);
+            // d = min(map(d, 0, radiusMax, 1.5, 1), 1.5)
+
+            let r = img.pixels[index + 0] * d
+            let g = img.pixels[index + 1] * d
+            let b = img.pixels[index + 2] * d
+
+            img.pixels[index + 0] = min(r, 255);
+            img.pixels[index + 1] = min(g, 255);
+            img.pixels[index + 2] = min(b, 255);
+        }
+    }
+    img.updatePixels();
+    return img
 }
