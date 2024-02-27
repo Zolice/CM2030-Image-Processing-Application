@@ -1,4 +1,5 @@
 // Declare constant variables
+const frameRateCap = 30
 const cameraSize = { x: 160, y: 120 }
 const classifier = objectdetect.frontalface
 
@@ -35,7 +36,7 @@ function setupCamera() {
     video = new Camera(cameraDisplay.body, () => {
         // Add the camera to the display objects manually
         cameraDisplay.objects.push(video.camera)
-        detector = new objectdetect.detector(video.originalWidth, video.originalHeight, 1.2, classifier);
+        detector = new objectdetect.detector(video.originalWidth, video.originalHeight, 1.2, classifier)
     })
 
     // Add the other objects
@@ -103,7 +104,7 @@ function setup() {
 
     // Setup the Canvas settings
     background(250)
-    frameRate(30)
+    frameRate(frameRateCap)
 
     // Create the UI
     ui = new UI()
@@ -199,16 +200,16 @@ function draw() {
                 edited.loadPixels()
 
                 // Copy the face pixels to the new image
-                let i = 0;
+                let i = 0
                 for (let x = face[0]; x <= face[0] + face[2]; x++) {
-                    let j = 0;
+                    let j = 0
                     for (let y = face[1]; y <= face[1] + face[3]; y++) {
-                        let index = (y * faceImg.width + x) * 4;
-                        let editIndex = (j * edited.width + i) * 4;
+                        let index = (y * faceImg.width + x) * 4
+                        let editIndex = (j * edited.width + i) * 4
                         edited.pixels[editIndex] = faceImg.pixels[index]
-                        edited.pixels[editIndex + 1] = faceImg.pixels[index + 1];
-                        edited.pixels[editIndex + 2] = faceImg.pixels[index + 2];
-                        edited.pixels[editIndex + 3] = faceImg.pixels[index + 3];
+                        edited.pixels[editIndex + 1] = faceImg.pixels[index + 1]
+                        edited.pixels[editIndex + 2] = faceImg.pixels[index + 2]
+                        edited.pixels[editIndex + 3] = faceImg.pixels[index + 3]
                         j++;
                     }
                     i++;

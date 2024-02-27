@@ -108,17 +108,17 @@ class Camera {
      */
     getImgFromPixels(pixels = this.loadPixels()) {
         // Create an image from the pixels
-        let img = createImage(cameraSize.x, cameraSize.y);
-        img.loadPixels();
+        let img = createImage(cameraSize.x, cameraSize.y)
+        img.loadPixels()
 
         // Copy the pixels over
         for (let i = 0; i < pixels.length; i++) {
-            img.pixels[i] = pixels[i];
+            img.pixels[i] = pixels[i]
         }
 
         // Return the image
-        img.updatePixels();
-        return img;
+        img.updatePixels()
+        return img
     }
 
     /**
@@ -211,16 +211,16 @@ class Camera {
                 let r = img.pixels[index]
                 let g = img.pixels[index + 1]
                 let b = img.pixels[index + 2]
-                let a = img.pixels[index + 3];
+                let a = img.pixels[index + 3]
 
                 // Red Filter
-                (x < cameraSize.x) ? img.pixels[index] = r : img.pixels[index] = 0;
+                (x < cameraSize.x) ? img.pixels[index] = r : img.pixels[index] = 0
 
                 // Green Filter
-                (x >= cameraSize.x && x <= cameraSize.x * 2) ? img.pixels[index + 1] = g : img.pixels[index + 1] = 0;
+                (x >= cameraSize.x && x <= cameraSize.x * 2) ? img.pixels[index + 1] = g : img.pixels[index + 1] = 0
 
                 // Blue Filter
-                (x >= cameraSize.x * 2) ? img.pixels[index + 2] = b : img.pixels[index + 2] = 0;
+                (x >= cameraSize.x * 2) ? img.pixels[index + 2] = b : img.pixels[index + 2] = 0
 
                 img.pixels[index + 3] = a
             }
