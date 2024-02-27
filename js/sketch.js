@@ -7,6 +7,7 @@ var cameraDisplay
 var video
 var sliders
 var dropdowns
+var checkboxes
 
 var detector
 
@@ -89,6 +90,8 @@ function setupCamera() {
 
 function setup() {
     sliders = []
+    dropdowns = []
+    checkboxes = []
     currentFaceEffect = faceEffect.GRAYSCALE
 
     // setup cameras
@@ -99,7 +102,7 @@ function setup() {
     canvas.parent("display")
 
     background(250)
-    frameRate(3)
+    frameRate(30)
 
     // create 3 rgb sliders
     sliders.push(new Display("Red", 0, 255, "row2", [createSlider(0, 255, 100)]))
@@ -110,6 +113,10 @@ function setup() {
     sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
     sliders.push(new Display("HSL", 0, 255, "row3", [createSlider(0, 255, 100)]))
 
+    // create a checkbox to turn on/off the face detection and filters
+    checkboxes.push(new Display("Face Effects", 0, 255, "row4", [createCheckbox("Face Effects", true)]))
+    checkboxes.push(new Display("Face Detection", 0, 255, "row4", [createCheckbox("Face Detection", true)]))
+
     // create the dropdown for the face effects
     let dropdown = createSelect()
     dropdown.option("Grayscale", faceEffect.GRAYSCALE)
@@ -118,7 +125,7 @@ function setup() {
     dropdown.option("Convert to HSL", faceEffect.CONVERT_HSL)
     dropdown.option("Pixelate", faceEffect.PIXELATE)
 
-    dropdowns = new Display("Face Effects", 0, 255, "row4", [dropdown])
+    dropdowns.push(new Display("Face Effects", 0, 255, "row4", [dropdown]))
 }
 
 function draw() {
@@ -132,71 +139,73 @@ function draw() {
     // Check if camera loaded
     if (!video.loaded && video.pixels.length <= 0) return
 
-    // Draw the cameras
-    // draw the 2 webcam images
-    image(video.getImgFromPixels(), getX(0), getY(0), 160, 120)
-    image(video.getImgFromPixels(), getX(0), getY(3), 160, 120)
+    if (checkboxes[0].objects[0].checked()) {
+        // Draw the cameras
+        // draw the 2 webcam images
+        image(video.getImgFromPixels(), getX(0), getY(0), 160, 120)
+        image(video.getImgFromPixels(), getX(0), getY(3), 160, 120)
 
-    // add labels
-    text("Original", getX(0), getY(1) - 12)
-    text("Original", getX(0), getY(4) - 12)
+        // add labels
+        text("Original", getX(0), getY(1) - 12)
+        text("Original", getX(0), getY(4) - 12)
 
-    // loadPixels()
-    // draw the grayscale img
-    image(video.getGrayscale(), getX(1), getY(0), 160, 120)
+        // loadPixels()
+        // draw the grayscale img
+        image(video.getGrayscale(), getX(1), getY(0), 160, 120)
 
-    // draw rgb channel
-    image(video.getRGB(), getX(0), getY(1), 480, 120)
+        // draw rgb channel
+        image(video.getRGB(), getX(0), getY(1), 480, 120)
 
-    // draw the threshold img
-    image(video.getThreshold(sliders[0].objects[0].value(), sliders[1].objects[0].value(), sliders[2].objects[0].value()), getX(0), getY(2), 480, 120)
+        // draw the threshold img
+        image(video.getThreshold(sliders[0].objects[0].value(), sliders[1].objects[0].value(), sliders[2].objects[0].value()), getX(0), getY(2), 480, 120)
 
-    // add labels
-    text("Grayscale", getX(1), getY(1) - 12)
+        // add labels
+        text("Grayscale", getX(1), getY(1) - 12)
 
-    text("Red", getX(0), getY(2) - 12)
-    text("Green", getX(1), getY(2) - 12)
-    text("Blue", getX(2), getY(2) - 12)
+        text("Red", getX(0), getY(2) - 12)
+        text("Green", getX(1), getY(2) - 12)
+        text("Blue", getX(2), getY(2) - 12)
 
-    text("Threshold", getX(0), getY(3) - 12)
-    text("Threshold", getX(1), getY(3) - 12)
-    text("Threshold", getX(2), getY(3) - 12)
+        text("Threshold", getX(0), getY(3) - 12)
+        text("Threshold", getX(1), getY(3) - 12)
+        text("Threshold", getX(2), getY(3) - 12)
 
-    // draw the CMYK
-    image(video.getConvertedCMYK(), getX(1), getY(3), 160, 120)
+        // draw the CMYK
+        image(video.getConvertedCMYK(), getX(1), getY(3), 160, 120)
 
-    // draw the HSL
-    image(video.getConvertedHSL(), getX(2), getY(3), 160, 120)
+        // draw the HSL
+        image(video.getConvertedHSL(), getX(2), getY(3), 160, 120)
 
-    // draw threshold cmyk
-    image(video.getThresholdCMYK(sliders[3].objects[0].value()), getX(1), getY(4), 160, 120)
+        // draw threshold cmyk
+        image(video.getThresholdCMYK(sliders[3].objects[0].value()), getX(1), getY(4), 160, 120)
 
-    // draw threshold hsl
-    image(video.getThresholdHSL(sliders[4].objects[0].value()), getX(2), getY(4), 160, 120)
+        // draw threshold hsl
+        image(video.getThresholdHSL(sliders[4].objects[0].value()), getX(2), getY(4), 160, 120)
 
-    // add labels
-    text("CMYK", getX(1), getY(4) - 12)
-    text("HSL", getX(2), getY(4) - 12)
+        // add labels
+        text("CMYK", getX(1), getY(4) - 12)
+        text("HSL", getX(2), getY(4) - 12)
 
-    text("Threshold", getX(1), getY(5) - 12)
-    text("Threshold", getX(2), getY(5) - 12)
+        text("Threshold", getX(1), getY(5) - 12)
+        text("Threshold", getX(2), getY(5) - 12)
+    }
 
     // face detection
-    if (video.loaded) {
+    if (checkboxes[1].objects[0].checked() && video.loaded) {
         let faces = detector.detect(video.camera.elt)
         let faceImg = video.getImgFromPixels()
 
         // image(faceImg, getX(2), getY(5))
 
         faceImg.loadPixels()
-        console.log("faceimg", faceImg.pixels[3])
+        // console.log("faceimg", faceImg.pixels[3])
 
         // console.log(video.camera.elt.height)
 
         // edit the faces 
-        console.log("faces.length", faces.length)
+        // console.log("faces.length", faces.length)
         faces.forEach((face) => {
-            console.log(face[4])
+            // console.log(face[4])
             if (face[4] > 4) {
                 // scale the values of the detector down to camera size
                 console.log("before", face[0], face[1], face[2], face[3])
@@ -254,10 +263,12 @@ function draw() {
 
                 // console.log(edited)
 
-                switch (dropdowns.objects[0].value()) {
+                // switch (dropdowns[0].value()) {
+                console.log(dropdowns[0])
+                switch (dropdowns[0].objects[0].value()) {
                     case faceEffect.GRAYSCALE:
                         edited = video.getGrayscale(edited)
-                        console.log("edited")
+                        // console.log("edited")
                         break
                     case faceEffect.BLUR:
                         edited = blurImage(edited)
@@ -280,7 +291,7 @@ function draw() {
 
                 faceImg.copy(edited, 0, 0, face[2], face[3], face[0], face[1], face[2], face[3])
                 // faceImg.updatePixels()
-                console.log("copied over")
+                // console.log("copied over")
             }
         })
 
