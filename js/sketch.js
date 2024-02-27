@@ -56,6 +56,7 @@ function setupCamera() {
     button.mousePressed(() => {
         // upload the picture
         let input = createFileInput((file) => {
+            input.hide()
             if (file.type === "image") {
                 console.log(file)
 
@@ -64,7 +65,6 @@ function setupCamera() {
                     image.resize(cameraSize.x, cameraSize.y)
                     image.loadPixels()
                     video.pixels = image.pixels
-                    console.log("call")
                     console.log(video.pixels.length)
                 })
 
@@ -80,6 +80,9 @@ function setupCamera() {
                 // // extract into video.pixels
                 // img.loadPixels()
                 // video.pixels = img.pixels                   
+            }
+            else {
+                alert("Please upload an image file")
             }
         })
         input.elt.click()
@@ -110,8 +113,11 @@ function setup() {
     sliders.push(new Display("Blue", 0, 255, "row2", [createSlider(0, 255, 100)]))
 
     // create 2 colourspace conversion sliders
-    sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
-    sliders.push(new Display("HSL", 0, 255, "row3", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("HSL Lightness", 0, 255, "row3", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("CMYK Cyan", 0, 255, "row3", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("CMYK Magenta", 0, 255, "row3", [createSlider(0, 255, 100)]))
+    sliders.push(new Display("CMYK Yellow", 0, 255, "row3", [createSlider(0, 255, 100)]))
+    // sliders.push(new Display("CMYK", 0, 255, "row3", [createSlider(0, 255, 100)]))
 
     // create a checkbox to turn on/off the face detection and filters
     checkboxes.push(new Display("Face Effects", 0, 255, "row4", [createCheckbox("Face Effects", true)]))
@@ -119,11 +125,11 @@ function setup() {
 
     // create the dropdown for the face effects
     let dropdown = createSelect()
-    dropdown.option("Grayscale", faceEffect.GRAYSCALE)
-    dropdown.option("Blur", faceEffect.BLUR)
-    dropdown.option("Convert to CMYK", faceEffect.CONVERT_CMYK)
-    dropdown.option("Convert to HSL", faceEffect.CONVERT_HSL)
-    dropdown.option("Pixelate", faceEffect.PIXELATE)
+    dropdown.option("1-Grayscale", faceEffect.GRAYSCALE)
+    dropdown.option("2-Blur", faceEffect.BLUR)
+    dropdown.option("3-Convert to CMYK", faceEffect.CONVERT_CMYK)
+    dropdown.option("4-Convert to HSL", faceEffect.CONVERT_HSL)
+    dropdown.option("5-Pixelate", faceEffect.PIXELATE)
 
     dropdowns.push(new Display("Face Effects", 0, 255, "row4", [dropdown]))
 }
@@ -177,10 +183,10 @@ function draw() {
         image(video.getConvertedHSL(), getX(2), getY(3), 160, 120)
 
         // draw threshold cmyk
-        image(video.getThresholdCMYK(sliders[3].objects[0].value()), getX(1), getY(4), 160, 120)
+        image(video.getThresholdCMYK(sliders[4].objects[0].value(), sliders[5].objects[0].value(), sliders[6].objects[0].value()), getX(1), getY(4), 160, 120)
 
         // draw threshold hsl
-        image(video.getThresholdHSL(sliders[4].objects[0].value()), getX(2), getY(4), 160, 120)
+        image(video.getThresholdHSL(sliders[3].objects[0].value()), getX(2), getY(4), 160, 120)
 
         // add labels
         text("CMYK", getX(1), getY(4) - 12)
@@ -302,6 +308,29 @@ function draw() {
 
     // performance checker
     console.log("Frame Rate", frameRate())
+}
+
+function keyPressed(event) {
+    if (event.key == 1){
+        // set fitler to 1
+        dropdowns[0].objects[0].elt.value = faceEffect.GRAYSCALE
+    }
+    else if (event.key == 2){
+        // set fitler to 2
+        dropdowns[0].objects[0].elt.value = faceEffect.BLUR
+    }
+    else if (event.key == 3){
+        // set fitler to 3
+        dropdowns[0].objects[0].elt.value = faceEffect.CONVERT_CMYK
+    }
+    else if (event.key == 4){
+        // set fitler to 4
+        dropdowns[0].objects[0].elt.value = faceEffect.CONVERT_HSL
+    }
+    else if (event.key == 5){
+        // set fitler to 5
+        dropdowns[0].objects[0].elt.value = faceEffect.PIXELATE
+    }
 }
 
 function getX(i) {
