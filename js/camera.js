@@ -488,9 +488,9 @@ class Camera {
                 let l = original.pixels[index + 2]
                 let a = original.pixels[index + 3]
 
-                original.pixels[index] = threshold > l ? 255 : 0
-                original.pixels[index + 1] = threshold > l ? 255 : 0
-                original.pixels[index + 2] = threshold > l ? 255 : 0
+                original.pixels[index] = l > threshold ? 255 : 0
+                original.pixels[index + 1] = l > threshold ? 255 : 0
+                original.pixels[index + 2] = l > threshold ? 255 : 0
                 original.pixels[index + 3] = a
             }
         }
