@@ -70,7 +70,7 @@ The following is a video demonstration of my project, as per the requirements.
 # Acknowledgments
 ## External Sources Utilized
 - p5.js Library from [p5.js](https://p5js.org/)
-- objectdetect.js Library by Marti`n Tschirsich
+- objectdetect.js Library by Martin Tschirsich
 
 ## Tools Utilized
 - <a href="https://github.com/"><img src="https://img.shields.io/badge/GitHub-black?style=for-the-badge&logo=github&logoColor=white" alt="github"></a>
