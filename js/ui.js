@@ -74,8 +74,8 @@ class UI {
     setupColourSpace(parent = "row3") {
         this.colourSpace.push(new Display("HSL Lightness", 0, 255, parent, [createSlider(0, 255, 100)]))
         this.colourSpace.push(new Display("CMYK Cyan", 0, 100, parent, [createSlider(0, 255, 0)]))
-        this.colourSpace.push(new Display("CMYK Magenta", 0, 100, parent, [createSlider(0, 255, 100)]))
-        this.colourSpace.push(new Display("CMYK Yellow", 0, 100, parent, [createSlider(0, 255, 100)]))
+        this.colourSpace.push(new Display("CMYK Magenta", 0, 100, parent, [createSlider(0, 255, 50)]))
+        this.colourSpace.push(new Display("CMYK Yellow", 0, 100, parent, [createSlider(0, 255, 50)]))
     }
 
     /**
@@ -89,8 +89,8 @@ class UI {
      * ui.setupToggles()
      */
     setupToggles(parent = "row4") {
-        this.toggles.push(new Display("Filters", 0, 255, parent, [createCheckbox("Filters", true)]))
-        this.toggles.push(new Display("Face Effects", 0, 255, parent, [createCheckbox("Face Effects", true)]))
+        this.toggles.push(new Display("Image Processing", 0, 255, parent, [createCheckbox("Image Processing", true)]))
+        this.toggles.push(new Display("Face Detection", 0, 255, parent, [createCheckbox("Face Detection", true)]))
     }
 
     /**
@@ -114,6 +114,6 @@ class UI {
         dropdown.option("6-Focus Face", faceEffect.FOCUS_FACE)
 
         // Add the dropdown to the UI
-        this.faceEffects.push(new Display("Face Detection", 0, 255, parent, [dropdown]))
+        this.faceEffects.push(new Display("Face Detection Filter", 0, 255, parent, [dropdown]))
     }
 }

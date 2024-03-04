@@ -104,7 +104,7 @@ function convolution(x, y, matrix, img) {
  * @example
  * filterImage(img)
  */
-function pixelate(img, pixelatedSize = 20) {
+function pixelate(img, pixelatedSize = 5) {
     img.loadPixels()
 
     //process block by block
@@ -166,7 +166,7 @@ function focusImg(img, x, y, radiusMax) {
         for (let j = 0; j < img.height; j++) {
             let d = dist(x, y, i, j)
             let index = (i + j * img.width) * 4
-            d > radiusMax ? d = 1 : d = map(d, 0, radiusMax, 1.5, 1)
+            d > radiusMax ? d = 0.5 : d = map(d, 0, radiusMax, 1.5, 0.5)
             // d = min(map(d, 0, radiusMax, 1.5, 1), 1.5)
 
             let r = img.pixels[index + 0] * d

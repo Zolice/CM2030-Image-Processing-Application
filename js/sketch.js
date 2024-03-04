@@ -231,6 +231,7 @@ function draw() {
                         edited = video.getConvertedCMYK(edited)
                         break
                     case faceEffect.PIXELATE:
+                        edited = video.getGrayscale(edited)
                         edited = pixelate(edited)
                         break
                     case faceEffect.FOCUS_FACE:
