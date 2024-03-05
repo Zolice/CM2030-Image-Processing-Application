@@ -18,11 +18,11 @@
 # Usage
 To start, open the `index.html` file using a Live Server extension.
 
-Alternatively, visit this website hosted by [Vercel](https://vercel.com/): [CM2030 Graphics Programming Snooker](https://cm-2030-graphics-programming-snooker.vercel.app/)
+Alternatively, visit this website hosted by [Vercel](https://vercel.com/): [CM2030-Image-Processing-Application](https://cm-2030-image-processing-application.vercel.app/)
 
 <p align="right"><a href="#top">back to top</a></p>
 
-# Commentary (Word Count: 447)
+# Commentary (Word Count: 497)
 ## Introduction
 
 As per requirements, I have created an image processing application using `p5.js` and `Object Detect`  library. All options for the application are labelled at the top. Most of the details can be found in the `README.md` file. 
@@ -60,10 +60,10 @@ I have added a “Focus Face” effect, where it brightens up your face, and dar
 ## Video Demonstration
 The following is a video demonstration of my project, as per the requirements.
 
-[Video Demonstration](./docs/Video%20Demonstration.mp4)
+[Video Demonstration](https://www.youtube.com/watch?v=GblH2vchwk0)
 
 ### Watch on YouTube
-[![YouTube Video Demonstration](http://img.youtube.com/vi/Gbv4HchGpK0/0.jpg)](http://www.youtube.com/watch?v=Gbv4HchGpK0 "CM2030 Snooker")
+[![YouTube Video Demonstration](http://img.youtube.com/vi/lqPHz3PXyGs/0.jpg)](https://www.youtube.com/watch?v=GblH2vchwk0 "CM2030 Snooker")
 
 <p align="right"><a href="#top">back to top</a></p>
 
